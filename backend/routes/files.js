@@ -64,6 +64,23 @@ router.get('/download/:id', async (req, res) => {
 
   res.json({ url: data.signedUrl, file_name: fileRecord.file_name });
 });
+router.delete('/:id', async (req, res) => {
+  const { data: fileRecord } = await supabase
+    .from('files')
+    .select('storage_path')
+    .eq('id', req.params.id)
+    .eq('user_id', req.userId)
+    .single();
+  if (!fileRecord) return res.status(404).json({ error: 'File not found' });
+
+  await supabase.storage.from('documents').remove([fileRecord.storage_path]);
+
+  const { error } = await supabase
+    .from('files').delete().eq('id', req.params.id).eq('user_id', req.userId);
+  if (error) return res.status(500).json({ error: error.message });
+
+  res.json({ message: 'Deleted successfully' });
+});
 
 
 
