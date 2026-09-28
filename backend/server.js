@@ -17,9 +17,9 @@ app.use(clerkMiddleware());
 const requireLogin = (req, res, next) => {
   const { userId } = getAuth(req);
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  req.userId = userId;
   next();
 };
-
 app.use('/api', requireLogin);
 app.use('/api/profile', profileRoutes);
 app.use('/api/folders', folderRoutes);
