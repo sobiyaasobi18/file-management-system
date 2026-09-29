@@ -22,4 +22,12 @@ router.get('/stats', requireAdmin, async (req, res) => {
   res.json({ userCount, totalStorage, uploadCount });
 });
 
+router.get('/users', requireAdmin, async (req, res) => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, full_name, email, role');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
 module.exports = router;
