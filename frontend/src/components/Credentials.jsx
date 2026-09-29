@@ -9,8 +9,9 @@ function Credentials() {
   const [items, setItems] = useState([])
   const [title, setTitle] = useState('')
   const [secret, setSecret] = useState('')
-  const [visibleId, setVisibleId] = useState(null)
+  const [revealed, setRevealed] = useState({})
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
 
   const authHeader = async () => ({
     headers: { Authorization: `Bearer ${await getToken()}` },
@@ -25,6 +26,8 @@ function Credentials() {
       setError('')
     } catch (err) {
       showError(err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -33,13 +36,9 @@ function Credentials() {
   }, [])
 
   const addItem = async () => {
-    if (!title.trim() || !secret.trim()) return
+    if (!title.trim() || !secret) return
     try {
-      await axios.post(
-        `${API}/credentials`,
-        { title, secret_value: secret },
-        await authHeader()
-      )
+      await axios.post(`${API}/credentials`, { title, secret_value: secret }, await authHeader())
       setTitle('')
       setSecret('')
       loadItems()
@@ -49,6 +48,7 @@ function Credentials() {
   }
 
   const deleteItem = async (id) => {
+    if (!window.confirm('Delete this credential?')) return
     try {
       await axios.delete(`${API}/credentials/${id}`, await authHeader())
       loadItems()
@@ -57,37 +57,44 @@ function Credentials() {
     }
   }
 
+  const toggleReveal = (id) =>
+    setRevealed((r) => ({ ...r, [id]: !r[id] }))
+
   return (
     <div>
       <h2>My Credentials</h2>
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Title (e.g. Gmail)"
-      />{' '}
-      <input
-        type="password"
-        value={secret}
-        onChange={(e) => setSecret(e.target.value)}
-        placeholder="Secret"
-      />{' '}
-      <button onClick={addItem}>Add</button>
+      <div>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Title (e.g. Gmail)"
+        />{' '}
+        <input
+          type="password"
+          value={secret}
+          onChange={(e) => setSecret(e.target.value)}
+          placeholder="Secret"
+        />{' '}
+        <button onClick={addItem}>Add</button>
+      </div>
+
+      {loading && <p>Loading...</p>}
+      {!loading && items.length === 0 && <p className="empty">No credentials yet.</p>}
 
       <ul>
-        {items.map((c) => (
-      <li key={c.id}>
-        {c.title}:{' '}
-        {visibleId === c.id ? c.secret_value : '••••••••'}{' '}
-        <button onClick={() => setVisibleId(visibleId === c.id ? null : c.id)}>
-          {visibleId === c.id ? 'Hide' : 'Show'}
-        </button>{' '}
-        <button onClick={() => deleteItem(c.id)}>Delete</button>
-      </li>
-    ))}
-  </ul>
-    </div>
+     {items.map((c) => (
+       <li key={c.id}>
+         {c.title}: {revealed[c.id] ? c.secret_value : '••••••••'}{' '}
+         <button onClick={() => toggleReveal(c.id)}>
+           {revealed[c.id] ? 'Hide' : 'Show'}
+         </button>{' '}
+         <button className="danger" onClick={() => deleteItem(c.id)}>Delete</button>
+       </li>
+     ))}
+   </ul>
+ </div>
   )
 }
 
