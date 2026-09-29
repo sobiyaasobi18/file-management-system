@@ -34,3 +34,4 @@ router.delete('/:id', async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   res.json({ message: 'Deleted successfully' });
 });
+module.exports = router;

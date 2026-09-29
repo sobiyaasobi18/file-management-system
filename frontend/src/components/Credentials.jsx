@@ -77,16 +77,16 @@ function Credentials() {
 
       <ul>
         {items.map((c) => (
-          <li key={c.id}>
-            {c.title}:{' '}
-            {visibleId === c.id ? c.secret_value : '••••••••'}{' '}
-            <button onClick={() => setVisibleId(visibleId === c.id ? null : c.id)}>
-              {visibleId === c.id ? 'Hide' : 'Show'}
-            </button>{' '}
-            <button onClick={() => deleteItem(c.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+      <li key={c.id}>
+        {c.title}:{' '}
+        {visibleId === c.id ? c.secret_value : '••••••••'}{' '}
+        <button onClick={() => setVisibleId(visibleId === c.id ? null : c.id)}>
+          {visibleId === c.id ? 'Hide' : 'Show'}
+        </button>{' '}
+        <button onClick={() => deleteItem(c.id)}>Delete</button>
+      </li>
+    ))}
+  </ul>
     </div>
   )
 }

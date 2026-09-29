@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useAuth, useUser, SignIn, UserButton } from '@clerk/react'
-import Folders from './Folders.jsx'
-import Files from './Files.jsx'
-import Credentials from './Credentials.jsx'
-
+import UserDashboard from './pages/UserDashboard.jsx'
+import AdminDashboard from './pages/AdminDashboard.jsx'
+import './styles.css'
 function App() {
   const { isLoaded, isSignedIn, getToken } = useAuth()
   const { user } = useUser()
-  const [message, setMessage] = useState('')
+  const [role, setRole] = useState(null)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (!isSignedIn || !user) return
@@ -24,9 +24,9 @@ function App() {
           },
           { headers: { Authorization: `Bearer ${token}` } }
         )
-        setMessage('Profile saved: ' + res.data[0].id)
+        setRole(res.data[0].role)
       } catch (err) {
-        setMessage('Error: ' + (err.response?.data?.error || err.message))
+        setError(err.response?.data?.error || err.message)
       }
     }
 
@@ -35,18 +35,17 @@ function App() {
 
   if (!isLoaded) return <p>Loading...</p>
   if (!isSignedIn) return <SignIn />
+  if (error) return <p style={{ color: 'red' }}>{error}</p>
+  if (!role) return <p>Loading profile...</p>
 
-  return (
-    <div>
+ return (
+  <div>
+    <div className="user-corner">
       <UserButton />
-      <h1>Personal Digital Vault</h1>
-      <p>{message}</p>
-      <Folders />
-      <Files />
-      <Credentials />
-
     </div>
-  )
+    {role === 'admin' ? <AdminDashboard /> : <UserDashboard />}
+  </div>
+)
 }
 
 export default App
