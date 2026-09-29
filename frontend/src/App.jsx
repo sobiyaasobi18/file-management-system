@@ -3,6 +3,7 @@ import axios from 'axios'
 import { useAuth, useUser, SignIn, UserButton } from '@clerk/react'
 import UserDashboard from './pages/UserDashboard.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import './styles.css'
 function App() {
   const { isLoaded, isSignedIn, getToken } = useAuth()
@@ -38,14 +39,23 @@ function App() {
   if (error) return <p style={{ color: 'red' }}>{error}</p>
   if (!role) return <p>Loading profile...</p>
 
- return (
-  <div>
-    <div className="user-corner">
-      <UserButton />
+   return (
+    <div>
+      <div className="user-corner">
+        <UserButton />
+      </div>
+      <Routes>
+        <Route
+          path="/admin"
+          element={role === 'admin' ? <AdminDashboard /> : <Navigate to="/folders" replace />}
+        />
+        <Route
+          path="/*"
+          element={role === 'admin' ? <Navigate to="/admin" replace /> : <UserDashboard />}
+        />
+      </Routes>
     </div>
-    {role === 'admin' ? <AdminDashboard /> : <UserDashboard />}
-  </div>
-)
+  )
 }
 
 export default App
