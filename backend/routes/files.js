@@ -64,6 +64,8 @@ router.get('/download/:id', async (req, res) => {
 
   res.json({ url: data.signedUrl, file_name: fileRecord.file_name });
 });
+
+
 router.delete('/:id', async (req, res) => {
   const { data: fileRecord } = await supabase
     .from('files')
