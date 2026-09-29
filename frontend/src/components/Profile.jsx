@@ -1,16 +1,23 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useAuth } from '@clerk/react'
+import { useForm } from 'react-hook-form'
 
 const API = 'http://localhost:5000/api'
 
 function Profile() {
   const { getToken } = useAuth()
   const [profile, setProfile] = useState(null)
-  const [fullName, setFullName] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({ defaultValues: { full_name: '' } })
 
   const authHeader = async () => ({
     headers: { Authorization: `Bearer ${await getToken()}` },
@@ -23,7 +30,7 @@ function Profile() {
       try {
         const res = await axios.get(`${API}/profile`, await authHeader())
         setProfile(res.data)
-        setFullName(res.data.full_name || '')
+        reset({ full_name: res.data.full_name || '' })
       } catch (err) {
         showError(err)
       } finally {
@@ -33,11 +40,11 @@ function Profile() {
     loadProfile()
   }, [])
 
-  const saveProfile = async () => {
+  const onSubmit = async ({ full_name }) => {
     setMessage('')
     setError('')
     try {
-      await axios.put(`${API}/profile`, { full_name: fullName }, await authHeader())
+      await axios.put(`${API}/profile`, { full_name }, await authHeader())
       setMessage('Saved')
     } catch (err) {
       showError(err)
@@ -53,10 +60,20 @@ function Profile() {
       {message && <p style={{ color: 'green' }}>{message}</p>}
 
       {profile && (
-        <div>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <p>
             <label>Full name</label><br />
-            <input value={fullName} onChange={(e) => setFullName(e.target.value)} />
+            <input
+              {...register('full_name', {
+                validate: (v) => v.trim() !== '' || 'Full name is required',
+                maxLength: { value: 100, message: 'Max 100 characters' },
+              })}
+            />
+            {errors.full_name && (
+              <span style={{ color: 'red', display: 'block' }}>
+                {errors.full_name.message}
+              </span>
+            )}
           </p>
           <p>
             <label>Email</label><br />
@@ -66,11 +83,11 @@ function Profile() {
             <label>Role</label><br />
             <input value={profile.role || ''} disabled />
           </p>
-          <button onClick={saveProfile}>Save</button>
-        </div>
+          <button type="submit" disabled={isSubmitting}>Save</button>
+        </form>
       )}
     </div>
   )
 }
 
-export default Profile;
+export default Profile
