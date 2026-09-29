@@ -9,6 +9,7 @@ function Folders() {
   const [folders, setFolders] = useState([])
   const [name, setName] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
 
   const authHeader = async () => ({
     headers: { Authorization: `Bearer ${await getToken()}` },
@@ -21,6 +22,8 @@ function Folders() {
       setError('')
     } catch (err) {
       setError(err.response?.data?.error || err.message)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -40,6 +43,7 @@ function Folders() {
   }
 
   const deleteFolder = async (id) => {
+    if (!window.confirm('Delete this folder?')) return
     try {
       await axios.delete(`${API}/folders/${id}`, await authHeader())
       loadFolders()
@@ -71,20 +75,23 @@ function Folders() {
       />{' '}
       <button onClick={createFolder}>Create</button>
 
-   <ul className="file-list">
-     {folders.map((f) => (
-       <li key={f.id} className="file-item">
-     <span className="file-icon">📁</span>
-     <div className="file-info">
-       <div className="file-name">{f.name}</div>
-     </div>
-     <div className="file-actions">
-       <button onClick={() => renameFolder(f.id, f.name)}>Rename</button>
-       <button className="danger" onClick={() => deleteFolder(f.id)}>Delete</button>
-     </div>
-   </li>
-  ))}
-   </ul>
+      {loading && <p>Loading...</p>}
+      {!loading && folders.length === 0 && <p className="empty">No folders yet.</p>}
+
+  <ul className="file-list">
+    {folders.map((f) => (
+      <li key={f.id} className="file-item">
+        <span className="file-icon">📁</span>
+        <div className="file-info">
+          <div className="file-name">{f.name}</div>
+        </div>
+        <div className="file-actions">
+          <button onClick={() => renameFolder(f.id, f.name)}>Rename</button>
+          <button className="danger" onClick={() => deleteFolder(f.id)}>Delete</button>
+        </div>
+      </li>
+    ))}
+  </ul>
     </div>
   )
 }

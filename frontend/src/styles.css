@@ -111,3 +111,10 @@ body {
 
 .stat-label { font-size: 14px; color: #6b7280; }
 .stat-value { font-size: 32px; font-weight: 700; margin-top: 6px; color: #4f46e5; }
+.empty { color: #6b7280; margin-top: 16px; }
+
+.card select {
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}

@@ -3,6 +3,7 @@ import '../styles.css'
 import Folders from '../components/Folders.jsx'
 import Files from '../components/Files.jsx'
 import Credentials from '../components/Credentials.jsx'
+import Profile from '../components/Profile.jsx'
 
 function UserDashboard() {
   const [tab, setTab] = useState('folders')
@@ -29,16 +30,23 @@ function UserDashboard() {
         >
           Credentials
         </button>
+        <button
+          className={tab === 'profile' ? 'active' : ''}
+          onClick={() => setTab('profile')}
+        >
+          Profile
+        </button>
       </div>
 
-    <div className="main">
-      <h1>My Vault</h1>
-      <div className="card">
-        {tab === 'folders' && <Folders />}
-        {tab === 'files' && <Files />}
-        {tab === 'credentials' && <Credentials />}
+      <div className="main">
+        <h1>My Vault</h1>
+        <div className="card">
+          {tab === 'folders' && <Folders />}
+          {tab === 'files' && <Files />}
+          {tab === 'credentials' && <Credentials />}
+          {tab === 'profile' && <Profile />}
+        </div>
       </div>
-    </div>
     </div>
   )
 }
